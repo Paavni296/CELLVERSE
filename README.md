@@ -32,5 +32,8 @@ Built using **HTML, CSS, and JavaScript**, CELLVERSE combines science and techno
 
  🚀 How to Run Locally
 1. Download or clone this repository:
+   https://paavni296.github.io/CELLVERSE/
+
+   MADE WITH 💖
  
  

@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CELLVERSE — Cells, Interactives & 3D Plant Cell</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ===================== Design Tokens ===================== */
+:root{
+  --bg:#0b1120; --panel:#0f172a; --text:#e5e7eb; --muted:#94a3b8;
+  --accent:#22d3ee; --accent-2:#a78bfa; --good:#10b981; --bad:#ef4444;
+  --glass: rgba(255,255,255,0.06); --glass-bd: rgba(255,255,255,0.12);
+  --radius:16px; --shadow:0 20px 40px rgba(0,0,0,.35);
+  --focus:0 0 0 3px rgba(34,211,238,.35);
+}
+
+/* ===================== Base ===================== */
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:linear-gradient(180deg,#070b18 0%,#0b1120 40%,#0a1023 100%);
+  color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,Noto Sans;scroll-behavior:smooth}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+.container{width:min(1200px,92%);margin:0 auto}
+section{padding:80px 0}
+h1,h2,h3{font-family:Outfit,Inter,sans-serif}
+.title{font-size:32px;margin:0 0 12px}
+.muted{color:var(--muted);margin:0 0 26px;max-width:70ch}
+.badge{font-size:12px;border:1px solid var(--glass-bd);padding:6px 10px;border-radius:999px;background:var(--glass)}
+.btn{padding:12px 18px;border-radius:12px;font-weight:700;border:1px solid var(--glass-bd);
+  background:linear-gradient(180deg,rgba(34,211,238,.25),rgba(34,211,238,.15));color:#071521;box-shadow:0 12px 24px rgba(34,211,238,.25)}
+.btn.secondary{background:linear-gradient(180deg,rgba(167,139,250,.22),rgba(167,139,250,.12));color:#140a2b;
+  box-shadow:0 12px 24px rgba(167,139,250,.25)}
+.btn:focus,a:focus{outline:none;box-shadow:var(--focus)}
+.card{border:1px solid var(--glass-bd);border-radius:18px;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));
+  box-shadow:var(--shadow)}
+.grid{display:grid;gap:18px;grid-template-columns:repeat(4,1fr)}
+@media(max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){.grid{grid-template-columns:1fr}}
+
+/* ===================== Header ===================== */
+header{position:sticky;top:0;z-index:1000;backdrop-filter:saturate(140%) blur(12px);
+  background:linear-gradient(180deg,rgba(10,14,30,.9),rgba(10,14,30,.6));border-bottom:1px solid var(--glass-bd)}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:14px 0}
+.brand{display:flex;gap:10px;align-items:center;font-weight:800;letter-spacing:.4px}
+.brand svg{width:28px;height:28px;filter:drop-shadow(0 4px 8px rgba(34,211,238,.4))}
+.links{display:flex;gap:22px;align-items:center}
+.links a{color:var(--muted);font-weight:600;position:relative}
+.links a.active{color:#fff}
+.links a.active::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:2px}
+.nav a.button{padding:10px 16px;border:1px solid var(--glass-bd);border-radius:999px;display:inline-flex;gap:8px;
+  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02))}
+.hamb{display:none;width:38px;height:38px;border-radius:10px;border:1px solid var(--glass-bd);align-items:center;justify-content:center;background:var(--glass)}
+@media(max-width:980px){.links{display:none}.hamb{display:flex}
+  .drawer{position:fixed;inset:0 0 auto auto;top:56px;right:0;width:100%;background:rgba(8,12,28,.96);
+    border-top:1px solid var(--glass-bd);display:none;flex-direction:column;padding:20px 24px;gap:12px}
+  .drawer a{padding:12px 8px;border-radius:10px;border:1px solid var(--glass-bd)}
+  .drawer.show{display:flex}
+}
+
+/* ===================== Hero ===================== */
+.hero{position:relative;padding:84px 0 56px;overflow:hidden;
+  background:radial-gradient(1200px 600px at 10% -10%,rgba(167,139,250,.15),transparent 60%),
+             radial-gradient(800px 500px at 90% 0%,rgba(34,211,238,.12),transparent 60%)}
+.hero-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:34px;align-items:center}
+.tag{display:inline-block;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:800;letter-spacing:.4px;color:#0b1120;
+  background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+.sub{color:var(--muted);font-size:clamp(14px,2.3vw,18px);max-width:56ch}
+.hero-card{position:relative;border-radius:var(--radius);overflow:hidden;border:1px solid var(--glass-bd);
+  background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));box-shadow:var(--shadow)}
+.hero-card img{aspect-ratio:16/10;object-fit:cover;filter:saturate(1.05) contrast(1.05)}
+.hero-card .overlay{position:absolute;inset:auto 14px 14px 14px;padding:12px 14px;border-radius:14px;border:1px solid var(--glass-bd);
+  background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(7,12,24,.55));backdrop-filter: blur(6px);display:flex;gap:12px;align-items:center}
+.pill{padding:6px 10px;border-radius:999px;border:1px solid var(--glass-bd);background:var(--glass);color:var(--text);font-size:12px}
+
+/* ===================== Cards & Helpers ===================== */
+.card img{height:190px;width:100%;object-fit:cover}
+.card .pad{padding:14px 14px 18px}
+.chip{font-size:11px;color:#0b1120;font-weight:800;letter-spacing:.4px;padding:6px 10px;border-radius:999px;display:inline-block;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+.card h3{margin:10px 0 6px;font-family:Outfit,Inter;font-weight:700}
+.card p{color:var(--muted);margin:0}
+.card:hover{transform:translateY(-6px);transition:transform .25s ease}
+
+/* ===================== Compare Slider ===================== */
+.compare{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--glass-bd);height:500px;max-width:900px;margin:0 auto;box-shadow:var(--shadow)}
+.compare .img{position:absolute;inset:0;background-size:contain;background-position:center;background-repeat:no-repeat;background-color:#000;filter:saturate(1.05) contrast(1.05)}
+.compare .img.top{clip-path:inset(0 50% 0 0)}
+.compare .handle{position:absolute;top:0;bottom:0;left:50%;width:2px;background:linear-gradient(180deg,var(--accent),var(--accent-2));box-shadow:0 0 0 2px rgba(255,255,255,.1)}
+.compare input[type="range"]{position:absolute;inset:0;width:100%;-webkit-appearance:none;background:transparent;cursor:ew-resize}
+.compare input::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-2));border:2px solid #0b1120;box-shadow:0 0 0 3px rgba(255,255,255,.25)}
+.compare .label{position:absolute;top:12px;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800;color:#071521;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+.compare .label.left{left:12px}.compare .label.right{right:12px}
+
+/* ===================== Prose ===================== */
+.prose{max-width:78ch;line-height:1.75}
+.prose h3{margin:18px 0 6px}
+.prose p{margin:10px 0}
+.prose .kicker{color:var(--muted);margin-top:0}
+.fact{border:1px solid var(--glass-bd);background:var(--glass);padding:12px 14px;border-radius:12px;margin:14px 0}
+.nice-table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--glass-bd);border-radius:12px;overflow:hidden}
+.nice-table th,.nice-table td{padding:10px 12px;border-bottom:1px solid var(--glass-bd)}
+.nice-table thead th{background:linear-gradient(180deg,rgba(34,211,238,.15),rgba(34,211,238,.08));color:#071521;text-align:left}
+.nice-table tbody tr:hover{background:rgba(255,255,255,.03)}
+pre.flow{padding:14px;border:1px solid var(--glass-bd);background:var(--glass);border-radius:12px;overflow:auto}
+
+/* ===================== Hotspots ===================== */
+.hotspot-wrap{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--glass-bd);box-shadow:var(--shadow);max-width:900px;margin:0 auto}
+.hotspot-wrap img{width:100%;height:auto;display:block;max-height:600px;object-fit:contain;background:#000}
+.hotspot{position:absolute;width:14px;height:14px;border-radius:50%;background:var(--accent);
+  box-shadow:0 0 0 6px rgba(34,211,238,.25),0 0 20px rgba(34,211,238,.6);cursor:pointer}
+.tip{
+  position:absolute;
+  transform:translate(-50%,-120%);
+  background:rgba(7,12,24,.95);
+  border:1px solid var(--glass-bd);
+  padding:12px 16px;
+  border-radius:12px;
+  font-size:13px;
+  line-height:1.5;
+  white-space:pre-line;
+  display:none;
+  max-width:280px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.2);
+  color:#fff
+}
+
+/* ===================== 3D Panel ===================== */
+#cell3dPanel{border:1px solid var(--glass-bd);border-radius:18px;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));
+  box-shadow:var(--shadow)}
+#threeCanvas{width:100%;height:520px;display:block;background:radial-gradient(800px 400px at 50% -10%,rgba(34,211,238,.08),transparent)}
+.controls3d{display:flex;gap:10px;flex-wrap:wrap;padding:12px;border-top:1px solid var(--glass-bd);background:var(--glass)}
+.controls3d .btn{padding:8px 12px}
+
+/* ===================== Quiz ===================== */
+.option{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--glass-bd);
+  border-radius:10px;margin:6px 0;background:var(--glass);cursor:pointer}
+.option input{accent-color:var(--accent)}
+.option.is-correct{border-color:rgba(34,211,238,.6)}
+.option.is-wrong{border-color:var(--bad);box-shadow:0 0 0 2px rgba(239,68,68,.25) inset}
+.q-feedback{font-size:12px;margin-top:6px;color:#a7f3d0;display:none}
+.q-feedback.bad{color:#fecaca}
+
+/* ===================== Footer ===================== */
+footer{padding:50px 0 70px;border-top:1px solid var(--glass-bd);
+  background:radial-gradient(800px 300px at 50% -10%,rgba(34,211,238,.08),transparent);color:var(--muted)}
+.footgrid{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:20px}
+.footgrid h4{color:#fff;margin:0 0 10px}
+.credit{font-size:12px;margin-top:16px}
+.foot-badges{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+
+/* ===================== Reveal ===================== */
+[data-reveal]{opacity:0;transform:translateY(14px);transition:all .7s ease}
+[data-reveal].show{opacity:1;transform:none}
+</style>
+</head>
+<body>
+
+<!-- ===================== Header ===================== -->
+<header>
+  <div class="container nav">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" stroke="#22d3ee" stroke-width="2"/>
+        <circle cx="12" cy="12" r="3.2" fill="#a78bfa"/>
+      </svg>
+      <span>CELLVERSE</span>
+    </div>
+    <nav class="links">
+      <a href="#features">Explore</a>
+      <a href="#intro">Intro</a>
+      <a href="#plant">Plant</a>
+      <a href="#animal">Animal</a>
+      <a href="#organelles">Organelles</a>
+      <a href="#transport">Transport</a>
+      <a href="#plant3d">3D Plant Cell</a>
+      <a href="#compare">Compare</a>
+      <a href="#hotspots">Map</a>
+      <a class="button" href="#quiz">Quiz</a>
+    </nav>
+    <button class="hamb" id="hamb" aria-label="Open menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="drawer" id="drawer">
+    <a href="#features" onclick="toggleMenu(false)">Explore</a>
+    <a href="#intro" onclick="toggleMenu(false)">Intro</a>
+    <a href="#plant" onclick="toggleMenu(false)">Plant</a>
+    <a href="#animal" onclick="toggleMenu(false)">Animal</a>
+    <a href="#organelles" onclick="toggleMenu(false)">Organelles</a>
+    <a href="#transport" onclick="toggleMenu(false)">Transport</a>
+    <a href="#plant3d" onclick="toggleMenu(false)">3D Plant Cell</a>
+    <a href="#compare" onclick="toggleMenu(false)">Compare</a>
+    <a href="#hotspots" onclick="toggleMenu(false)">Map</a>
+    <a href="#quiz" onclick="toggleMenu(false)">Quiz</a>
+  </div>
+</header>
+
+<!-- ===================== Hero ===================== -->
+<section class="hero">
+  <div class="container hero-grid" data-reveal>
+    <div>
+      <span class="tag">Interactive Biology</span>
+      <h1>Journey Inside the Cell</h1>
+      <p class="sub">Explore plant and animal cells with animated diagrams, an interactive 3D plant cell model, comparison sliders, hotspots, and a self-grading quiz.</p>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:22px">
+        <a class="btn" href="#plant3d">Watch 3D Cell Model</a>
+        <a class="btn secondary" href="#compare">Compare Cells</a>
+      </div>
+    </div>
+    <div class="hero-card">
+      <img src="picz/microscope.jpg" alt="Microscope view of cells" />
+      <div class="overlay">
+        <span class="pill">Plant cell</span>
+        <span class="pill">40x magnification</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===================== Explore Modules ===================== -->
+<section id="features">
+  <div class="container" data-reveal>
+    <h2 class="title">Explore Cell Biology</h2>
+    <p class="muted">From basic structure to complex interactions, dive into the fascinating world of cells.</p>
+    <div class="grid">
+      <a href="#intro" class="card">
+        <img src="picz/celltheory.jpg" alt="Cell Theory" />
+        <div class="pad">
+          <span class="chip">Intro</span>
+          <h3>Cell Theory</h3>
+          <p>History & fundamentals</p>
+        </div>
+      </a>
+      <a href="#plant" class="card">
+        <img src="picz/plant-cell.jpg" alt="Plant Cell" />
+        <div class="pad">
+          <span class="chip">Plant Cell</span>
+          <h3>Plant Cell Structure</h3>
+          <p>Core components</p>
+        </div>
+      </a>
+      <a href="#organelles" class="card">
+        <img src="picz/cellorganelles.jpg" alt="Cell Organelles" />
+        <div class="pad">
+          <span class="chip">Organelles</span>
+          <h3>Cellular Workflow</h3>
+          <p>Factory analogy</p>
+        </div>
+      </a>
+      <a href="#transport" class="card">
+        <img src="picz/celltransport.jpg" alt="Cell Transport" />
+        <div class="pad">
+          <span class="chip">Transport</span>
+          <h3>Cell Transport</h3>
+          <p>Moving materials</p>
+        </div>
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===================== Intro / Cell Theory ===================== -->
+<section id="intro">
+  <div class="container" data-reveal>
+    <h2 class="title">What is a Cell?</h2>
+    <div class="prose">
+      <p class="kicker">Cells are the <strong>structural and functional unit of life</strong>. Organisms are unicellular or multicellular.</p>
+      <div class="fact">Your body hosts ~<strong>37 trillion</strong> cells; ~<strong>3 million</strong> die & are replaced each second.</div>
+      <h3>History</h3>
+      <table class="nice-table"><thead><tr><th>Year</th><th>Scientist</th><th>Contribution</th></tr></thead><tbody>
+        <tr><td>1665</td><td>Robert Hooke</td><td>Coined “cell” (cork)</td></tr>
+        <tr><td>1674</td><td>Anton van Leeuwenhoek</td><td>Observed living cells</td></tr>
+        <tr><td>1831</td><td>Robert Brown</td><td>Discovered nucleus</td></tr>
+        <tr><td>1838–39</td><td>Schleiden & Schwann</td><td>Cell Theory</td></tr>
+        <tr><td>1855</td><td>Virchow</td><td>“Cells from cells”</td></tr>
+      </tbody></table>
+      <h3>Cell Theory</h3>
+      <ul class="kicker">
+        <li>All organisms are made of one or more cells.</li>
+        <li>The cell is the basic unit of structure & function.</li>
+        <li>Cells arise from pre-existing cells.</li>
+      </ul>
+      <h3>Prokaryote vs Eukaryote</h3>
+      <table class="nice-table"><thead><tr><th>Feature</th><th>Prokaryote</th><th>Eukaryote</th></tr></thead><tbody>
+        <tr><td>Nucleus</td><td>Absent</td><td>Present</td></tr>
+        <tr><td>Size</td><td>1–10 µm</td><td>10–100 µm</td></tr>
+        <tr><td>Organelles</td><td>Not membrane-bound</td><td>Membrane-bound</td></tr>
+        <tr><td>Examples</td><td>Bacteria</td><td>Plant & Animal cells</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== Plant Cell ===================== -->
+<section id="plant">
+  <div class="container" data-reveal>
+    <h2 class="title">Plant Cell — The Green Powerhouse</h2>
+    <div class="prose">
+      <h3>Labeled Plant Cell</h3>
+      <p>Key parts: <strong>cell wall</strong>, <strong>plasma membrane</strong>, <strong>cytoplasm</strong>, <strong>nucleus</strong>, <strong>chloroplasts</strong>, <strong>large central vacuole</strong>, <strong>mitochondria</strong>, <strong>ER</strong>, <strong>Golgi</strong>, <strong>ribosomes</strong>, <strong>plasmodesmata</strong>.</p>
+      <div class="fact">Tip: Caption diagrams clearly (e.g., “Fig 2.1 — Plant Cell”).</div>
+      <h3>Unique Features</h3>
+      <table class="nice-table"><thead><tr><th>Feature</th><th>Description</th><th>Function</th></tr></thead><tbody>
+        <tr><td>Cell Wall</td><td>Rigid cellulose layer</td><td>Shape & protection</td></tr>
+        <tr><td>Large Central Vacuole</td><td>~70–90% of volume</td><td>Turgor & storage</td></tr>
+        <tr><td>Chloroplasts</td><td>Chlorophyll</td><td>Photosynthesis</td></tr>
+        <tr><td>Plasmodesmata</td><td>Channels between cells</td><td>Communication</td></tr>
+      </tbody></table>
+      <h3>Chloroplast & Plastids</h3>
+      <p><strong>Thylakoids</strong> (stacked as <em>grana</em>) in <strong>stroma</strong>; light rxns on thylakoids, carbon fixation in stroma.</p>
+      <table class="nice-table"><thead><tr><th>Plastid</th><th>Color</th><th>Function</th><th>Example</th></tr></thead><tbody>
+        <tr><td>Chloroplast</td><td>Green</td><td>Photosynthesis</td><td>Leaves</td></tr>
+        <tr><td>Chromoplast</td><td>Red/Yellow</td><td>Pigments</td><td>Tomato, Mango</td></tr>
+        <tr><td>Leucoplast</td><td>Clear</td><td>Storage</td><td>Potato tuber</td></tr>
+      </tbody></table>
+      <div class="fact">The red of ripe tomatoes comes from <strong>chromoplasts</strong> (carotenoids).</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== Animal Cell ===================== -->
+<section id="animal">
+  <div class="container" data-reveal>
+    <h2 class="title">Animal Cell — Dynamic & Specialized</h2>
+    <div class="prose">
+      <h3>Key Differences vs Plant Cells</h3>
+      <table class="nice-table"><thead><tr><th>Feature</th><th>Plant</th><th>Animal</th><th>Notes</th></tr></thead><tbody>
+        <tr><td>Cell Wall</td><td>Present</td><td>Absent</td><td>Flexibility in animals</td></tr>
+        <tr><td>Chloroplast</td><td>Present</td><td>Absent</td><td>Heterotrophic nutrition</td></tr>
+        <tr><td>Vacuole</td><td>Large</td><td>Small/many</td><td>Storage vs minor roles</td></tr>
+        <tr><td>Centrioles</td><td>Usually absent</td><td>Present</td><td>Spindle in mitosis</td></tr>
+        <tr><td>Lysosomes</td><td>Less common</td><td>Common</td><td>Intracellular digestion</td></tr>
+      </tbody></table>
+      <h3>Specialized Cells</h3>
+      <table class="nice-table"><thead><tr><th>Type</th><th>Adaptation</th><th>Function</th></tr></thead><tbody>
+        <tr><td>RBC</td><td>No nucleus; biconcave</td><td>Max O₂ transport</td></tr>
+        <tr><td>Neuron</td><td>Long axon</td><td>Signalling</td></tr>
+        <tr><td>Muscle</td><td>Actin/myosin</td><td>Contraction</td></tr>
+        <tr><td>WBC</td><td>Flexible shape</td><td>Defense</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== Organelles (Workflow) ===================== -->
+<section id="organelles">
+  <div class="container" data-reveal>
+    <h2 class="title">Membrane-Bound Organelles — Workflow</h2>
+    <div class="prose">
+      <table class="nice-table"><thead><tr><th>Organelle</th><th>Plant</th><th>Animal</th><th>Main Function</th></tr></thead><tbody>
+        <tr><td>Nucleus</td><td>✓</td><td>✓</td><td>DNA control</td></tr>
+        <tr><td>Mitochondria</td><td>✓</td><td>✓</td><td>ATP energy</td></tr>
+        <tr><td>ER (RER/SER)</td><td>✓</td><td>✓</td><td>Protein/lipid synth</td></tr>
+        <tr><td>Golgi</td><td>✓</td><td>✓</td><td>Packaging/secretion</td></tr>
+        <tr><td>Lysosomes</td><td>rare</td><td>common</td><td>Digestion</td></tr>
+        <tr><td>Chloroplasts</td><td>✓</td><td>✗</td><td>Photosynthesis</td></tr>
+        <tr><td>Vacuole</td><td>Large</td><td>Small</td><td>Turgor/storage</td></tr>
+      </tbody></table>
+      <h3>Production Line</h3>
+      <pre class="flow">Nucleus → mRNA
+↓
+Rough ER → Proteins
+↓
+Golgi → Modify, sort, package
+↓
+Vesicles → Deliver/Secrete
+↓
+Mitochondria → Supply ATP</pre>
+      <div class="fact">Analogy: <strong>Nucleus = CEO</strong>, <strong>ER = Production</strong>, <strong>Golgi = Packaging</strong>, <strong>Vesicles = Delivery</strong>, <strong>Mitochondria = Power</strong>.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== Transport ===================== -->
+<section id="transport">
+  <div class="container" data-reveal>
+    <h2 class="title">Plasma Membrane & Transport</h2>
+    <div class="prose">
+      <h3>Fluid Mosaic Model</h3>
+      <table class="nice-table"><thead><tr><th>Component</th><th>Description</th><th>Function</th></tr></thead><tbody>
+        <tr><td>Phospholipids</td><td>Bilayer (heads/tails)</td><td>Main barrier</td></tr>
+        <tr><td>Proteins</td><td>Integral/peripheral</td><td>Transport/signalling</td></tr>
+        <tr><td>Cholesterol</td><td>Between lipids</td><td>Fluidity/stability</td></tr>
+        <tr><td>Carbohydrates</td><td>Glyco-chains</td><td>Cell identity</td></tr>
+      </tbody></table>
+      <h3>Passive (no ATP, High→Low)</h3>
+      <table class="nice-table"><thead><tr><th>Type</th><th>Description</th><th>Example</th></tr></thead><tbody>
+        <tr><td>Diffusion</td><td>Molecules spread out</td><td>Perfume</td></tr>
+        <tr><td>Osmosis</td><td>Water through membrane</td><td>Raisins swell</td></tr>
+        <tr><td>Facilitated</td><td>Via channels</td><td>Glucose uptake</td></tr>
+      </tbody></table>
+      <h3>Active (ATP, Low→High)</h3>
+      <table class="nice-table"><thead><tr><th>Type</th><th>Mechanism</th><th>Example</th></tr></thead><tbody>
+        <tr><td>Pumps</td><td>ATP-driven</td><td>Na⁺/K⁺ pump</td></tr>
+        <tr><td>Endocytosis</td><td>Engulfing</td><td>WBC eating bacteria</td></tr>
+        <tr><td>Exocytosis</td><td>Secretion</td><td>Insulin release</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 3D Plant Cell ===================== -->
+<section id="plant3d">
+  <div class="container" data-reveal>
+    <h2 class="title">3D Plant Cell Model</h2>
+    <p class="muted">Watch our detailed 3D cell model showcasing all the major organelles and their functions.</p>
+    <div id="cell3dPanel" class="card">
+      <video controls autoplay loop muted style="width:100%; max-height:600px; display:block;">
+        <source src="picz/3dcellmodel.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+      <div class="controls3d" style="justify-content:center">
+        <span class="badge">Interactive 3D Cell Model Visualization</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== Compare ===================== -->
+<section id="compare">
+  <div class="container" data-reveal>
+    <h2 class="title">Compare Plant & Animal Cells</h2>
+    <div class="compare">
+      <div class="img bottom" style="background-image:url('picz/plantcellcompare.jpg')"></div>
+      <div class="img top" id="topImg" style="background-image:url('picz/animalcellcompare.jpg')"></div>
+      <div class="handle" id="handle"></div>
+      <input type="range" id="slider" min="0" max="100" value="50">
+      <div class="label left">Animal Cell</div>
+      <div class="label right">Plant Cell</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===================== Hotspots ===================== -->
+<section id="hotspots">
+  <div class="container" data-reveal>
+    <h2 class="title">Interactive Cell Map</h2>
+    <p class="muted">Click the dots to explore cell structures. Touch and hold on mobile.</p>
+    <div class="hotspot-wrap">
+      <img src="picz/hotspot.jpg" alt="Cell diagram with interactive hotspots">
+      <div class="hotspot" style="top:38%;left:47%" data-tip="Nucleus: The control center of the cell, containing DNA. Key features:
+• Contains genetic material (DNA/chromosomes)
+• Protected by nuclear membrane
+• Contains nucleolus for ribosome assembly
+• Controls gene expression and protein synthesis"></div>
+
+      <div class="hotspot" style="top:58%;left:50%" data-tip="Mitochondria: The powerhouse of the cell. Functions:
+• Produces ATP through cellular respiration
+• Has inner/outer membranes
+• Contains its own DNA
+• Essential for energy production"></div>
+
+      <div class="hotspot" style="top:50%;left:50%" data-tip="Rough ER: Factory for protein production. Features:
+• Covered with ribosomes
+• Connected to nuclear membrane
+• Synthesizes proteins for export
+• Modifies newly made proteins"></div>
+
+      <div class="hotspot" style="top:50%;left:30%" data-tip="Golgi Apparatus: The cell's packaging center. Role:
+• Modifies proteins and lipids
+• Creates transport vesicles
+• Sorts cellular products
+• Processes proteins for secretion"></div>
+
+      <div class="hotspot" style="top:65%;left:52%" data-tip="Lysosomes: Digestive system of the cell. Functions:
+• Contains digestive enzymes
+• Breaks down cellular waste
+• Recycles damaged organelles
+• Helps in cell defense"></div>
+      <div class="tip" id="tip"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===================== Advanced ===================== -->
+<section id="advanced">
+  <div class="container" data-reveal>
+    <h2 class="title">Specialized Cells, Microscopy & Biotech</h2>
+    <div class="prose">
+      <h3>Specialized Cells</h3>
+      <table class="nice-table"><thead><tr><th>Cell</th><th>Feature</th><th>Purpose</th></tr></thead><tbody>
+        <tr><td>Neuron</td><td>Long axon</td><td>Impulse transmission</td></tr>
+        <tr><td>RBC</td><td>No nucleus; biconcave</td><td>Max O₂ transport</td></tr>
+        <tr><td>Muscle</td><td>Actin/myosin</td><td>Contraction</td></tr>
+        <tr><td>Guard Cell</td><td>Kidney shape</td><td>Stomatal opening</td></tr>
+        <tr><td>Root Hair</td><td>Long extension</td><td>Absorption</td></tr>
+      </tbody></table>
+      <h3>Microscopy</h3>
+      <table class="nice-table"><thead><tr><th>Type</th><th>Magnification</th><th>Use</th></tr></thead><tbody>
+        <tr><td>Simple</td><td>~100×</td><td>Basic magnification</td></tr>
+        <tr><td>Compound</td><td>Up to ~2000×</td><td>Cells & bacteria</td></tr>
+        <tr><td>Electron (TEM/SEM)</td><td>Up to ~1,000,000×</td><td>Ultra-structure</td></tr>
+      </tbody></table>
+      <h3>Modern Biotechnology</h3>
+      <ul class="kicker">
+        <li><strong>Stem Cells</strong>: Regenerate tissues.</li>
+        <li><strong>Cloning</strong>: Dolly (1996), research & conservation.</li>
+        <li><strong>CRISPR</strong>: Edit defective genes.</li>
+        <li><strong>Organoids</strong>: Mini-organs for testing.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== Quiz ===================== -->
+<section id="quiz">
+  <div class="container" data-reveal>
+    <h2 class="title">Mini Quiz</h2>
+    <div id="quizProgress" style="height:6px;border-radius:999px;border:1px solid var(--glass-bd);background:var(--glass);overflow:hidden;margin:12px 0 18px">
+      <div id="quizBar" style="height:100%;width:0%;background:linear-gradient(90deg,#22d3ee,#a78bfa)"></div>
+    </div>
+    <div class="card" style="padding:18px">
+      <form id="qform" class="prose">
+        <ol id="qList" style="color:var(--muted);line-height:1.8;margin:0"></ol>
+        <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+          <button type="submit" class="btn" id="submitBtn">Submit Answers</button>
+          <button type="button" class="btn secondary" id="retryBtn" style="display:none">Try Again</button>
+          <span id="score" class="badge" style="display:none"></span>
+        </div>
+        <div id="explain" class="fact" style="display:none;margin-top:12px"></div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== Footer ===================== -->
+<footer>
+  <div class="container footgrid" data-reveal>
+    <div>
+      <div class="brand" style="margin-bottom:8px">
+        <svg viewBox="0 0 24 24" fill="none" style="width:24px;height:24px">
+          <circle cx="12" cy="12" r="9" stroke="#22d3ee" stroke-width="2"/>
+          <circle cx="12" cy="12" r="3.2" fill="#a78bfa"/>
+        </svg>
+        <span style="font-weight:800">CELLVERSE</span>
+      </div>
+      <p>A student-built portal to understand cells with visuals, interactivity, and short notes.</p>
+      <div class="foot-badges">
+        <span class="badge">HTML • CSS • JS</span>
+        <span class="badge">Mobile friendly</span>
+        <span class="badge">Interactive Models</span>
+      </div>
+      <div class="credit">© 2025 Cellverse Team. For educational use.</div>
+    </div>
+    <div><h4>Modules</h4><p><a href="#plant">Plant</a> • <a href="#animal">Animal</a> • <a href="#organelles">Organelles</a> • <a href="#transport">Transport</a></p></div>
+    <div><h4>Get Started</h4><p><a href="#plant3d">Watch 3D cell</a> or <a href="#quiz">take the quiz</a>.</p></div>
+  </div>
+</footer>
+
+<!-- ===================== Scripts ===================== -->
+<script>
+/* ---------- Header: mobile menu ---------- */
+const drawer=document.getElementById('drawer'), hamb=document.getElementById('hamb');
+function toggleMenu(force){ if(!drawer) return; drawer.classList.toggle('show', force ?? !drawer.classList.contains('show')); }
+hamb?.addEventListener('click', ()=>toggleMenu());
+
+/* ---------- Reveal on scroll ---------- */
+const revealItems=document.querySelectorAll('[data-reveal]');
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('show');io.unobserve(e.target)}})},{threshold:.12});
+revealItems.forEach(el=>io.observe(el));
+
+/* ---------- Scroll spy ---------- */
+const sections=[...document.querySelectorAll('section[id]')];
+const navLinks=[...document.querySelectorAll('.links a[href^="#"]')];
+const spy=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){
+      const id='#'+e.target.id;
+      navLinks.forEach(a=>a.classList.toggle('active', a.getAttribute('href')===id));
+    }
+  });
+},{rootMargin:"-40% 0px -55% 0px",threshold:0});
+sections.forEach(s=>spy.observe(s));
+
+/* ---------- Compare slider ---------- */
+const slider=document.getElementById('slider');
+const topImg=document.getElementById('topImg');
+const handle=document.getElementById('handle');
+function setClip(val){ if(!topImg||!handle) return; const p=Number(val); topImg.style.clipPath=`inset(0 ${100-p}% 0 0)`; handle.style.left=p+'%'; }
+slider?.addEventListener('input',e=>setClip(e.target.value)); if(slider) setClip(slider.value);
+
+/* ---------- Hotspots tooltip ---------- */
+const tip=document.getElementById('tip');
+document.querySelectorAll('.hotspot').forEach(dot=>{
+  dot.addEventListener('mouseenter',()=>showTip(dot));
+  dot.addEventListener('mouseleave',()=>tip&&(tip.style.display='none'));
+  dot.addEventListener('click',()=>showTip(dot,true));
+});
+function showTip(dot,lock=false){
+  if(!tip) return;
+  tip.textContent=dot.dataset.tip;
+  const r=dot.getBoundingClientRect(), w=dot.parentElement.getBoundingClientRect();
+  tip.style.left=(r.left-w.left+r.width/2)+'px';
+  tip.style.top =(r.top -w.top)+'px';
+  tip.style.display='block';
+  if(!lock){ setTimeout(()=>{ tip.style.display='none'; },1500); }
+}
+
+/* ---------- QUIZ ENGINE ---------- */
+const QUIZ_QUESTIONS=[
+  {q:"Which organelle is called the powerhouse of the cell?", options:[{k:"mito",label:"Mitochondria",correct:true},{k:"golgi",label:"Golgi"},{k:"lyso",label:"Lysosome"}], explain:"Mitochondria generate ATP via respiration."},
+  {q:"Osmosis is the movement of ______ through a semipermeable membrane.", options:[{k:"water",label:"Water",correct:true},{k:"protein",label:"Protein"},{k:"dna",label:"DNA"}], explain:"Osmosis = diffusion of water."},
+  {q:"Name one structure present in plant cells but absent in animal cells.", options:[{k:"wall",label:"Cell wall",correct:true},{k:"chloro",label:"Chloroplast",correct:true},{k:"none",label:"None"}], explain:"Plants have a cellulose wall and chloroplasts."},
+  {q:"Which ER type synthesizes proteins?", options:[{k:"rer",label:"Rough ER",correct:true},{k:"ser",label:"Smooth ER"}], explain:"Rough ER has ribosomes."},
+  {q:"Which human cell lacks a nucleus?", options:[{k:"rbc",label:"RBC",correct:true},{k:"wbc",label:"WBC"},{k:"neuron",label:"Neuron"}], explain:"Mature RBCs eject the nucleus."},
+  {q:"Active transport moves substances:", options:[{k:"low2high",label:"From low to high using ATP",correct:true},{k:"high2low",label:"High to low, no ATP"}], explain:"Pumps + ATP move against gradient."}
+];
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const qList=document.getElementById('qList'), qform=document.getElementById('qform');
+const scoreEl=document.getElementById('score'), explainEl=document.getElementById('explain');
+const retryBtn=document.getElementById('retryBtn'), submitBtn=document.getElementById('submitBtn');
+const bar=document.getElementById('quizBar'); let workingQuestions=[];
+function renderQuiz(){
+  qList.innerHTML=""; scoreEl.style.display="none"; explainEl.style.display="none"; retryBtn.style.display="none"; submitBtn.disabled=false; submitBtn.textContent="Submit Answers"; bar.style.width="0%";
+  workingQuestions=shuffle(QUIZ_QUESTIONS.map(q=>({...q,options:shuffle(q.options.map(o=>({...o})))})));
+  workingQuestions.forEach((q,idx)=>{
+    const li=document.createElement('li'); li.style.marginBottom="14px";
+    li.innerHTML=`
+      <div style="color:var(--text);font-weight:600">${q.q}</div>
+      <div role="group" aria-label="Question ${idx+1}">
+        ${q.options.map(o=>`<label class="option"><input type="radio" name="q${idx}" value="${o.k}"><span>${o.label}</span></label>`).join('')}
+      </div>
+      <div class="q-feedback" id="fb${idx}"></div>
+    `;
+    qList.appendChild(li);
+  });
+  updateProgress();
+}
+function updateProgress(){
+  const total=workingQuestions.length; const answered=[...qform.querySelectorAll('input[type="radio"]')].filter(i=>i.checked).length;
+  const pct=Math.round((answered/total)*100); bar.style.width=pct+"%";
+}
+qform?.addEventListener('change',updateProgress);
+qform?.addEventListener('submit',e=>{
+  e.preventDefault();
+  // collect selected values before disabling inputs (disabled controls are excluded from FormData)
+  const formData = new FormData(qform);
+  const inputs = qform.querySelectorAll('input[type="radio"]');
+  inputs.forEach(i=>i.disabled=true);
+  let score = 0;
+  workingQuestions.forEach((q,idx)=>{
+    const val = formData.get('q'+idx) || '';
+    const keys = q.options.filter(o=>o.correct).map(o=>o.k);
+    const ok = keys.includes(val);
+    const group = qform.querySelectorAll(`input[name="q${idx}"]`);
+    group.forEach(input=>{
+      const lab = input.closest('label.option');
+      if(keys.includes(input.value)) lab?.classList.add('is-correct');
+      if(input.checked && !ok) lab?.classList.add('is-wrong');
+    });
+    const fb = document.getElementById('fb'+idx);
+    if(ok){ score++; fb.textContent = "Correct!"; fb.classList.remove('bad'); }
+    else { fb.textContent = q.explain; fb.classList.add('bad'); }
+    fb.style.display = 'block';
+  });
+  scoreEl.style.display='inline-block'; scoreEl.textContent = `Score: ${score}/${workingQuestions.length}`;
+  explainEl.style.display='block'; explainEl.innerHTML = `<strong>Nice!</strong> Review red explanations, then press <em>Try Again</em>.`;
+  retryBtn.style.display='inline-flex'; submitBtn.disabled = true; submitBtn.textContent = "Submitted";
+});
+retryBtn?.addEventListener('click',()=>renderQuiz());
+renderQuiz();
+
+/* ---------- 3D Plant Cell (Three.js) ---------- */
+let scene,camera,renderer,controls,raycaster,mouse,autoRotate=true,organelleMeshes=[];
+const canvas=document.getElementById('threeCanvas');
+function init3D(){
+  scene=new THREE.Scene();
+  scene.background=null; // let CSS gradient show
+
+  const w=canvas.clientWidth, h=canvas.clientHeight;
+  camera=new THREE.PerspectiveCamera(50,w/h,0.1,1000);
+  camera.position.set(3.6,2.6,3.6);
+
+  renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(w,h,false);
+
+  // Lights
+  const hemi=new THREE.HemisphereLight(0xffffff,0x223344,1.0); scene.add(hemi);
+  const dir =new THREE.DirectionalLight(0xffffff,0.9); dir.position.set(5,6,3); scene.add(dir);
+
+  // Controls
+  controls=new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping=true; controls.dampingFactor=0.06; controls.minDistance=2; controls.maxDistance=9;
+
+  // Materials
+  const membraneMat=new THREE.MeshPhysicalMaterial({color:0x87b5ff,transparent:true,opacity:0.18,roughness:0.2,metalness:0.0,transmission:0.5,thickness:0.6});
+  const wallMat    =new THREE.MeshStandardMaterial({color:0x7cb342,transparent:true,opacity:0.12});
+  const vacuoleMat =new THREE.MeshStandardMaterial({color:0x22d3ee,transparent:true,opacity:0.10,emissive:0x0,roughness:0.6});
+  const nucleusMat =new THREE.MeshStandardMaterial({color:0x9b87f5,transparent:true,opacity:0.85,emissive:0x221144,roughness:0.3});
+  const chloroMat  =new THREE.MeshStandardMaterial({color:0x1faa00,emissive:0x0,roughness:0.4,metalness:0.0});
+  const mitoMat    =new THREE.MeshStandardMaterial({color:0xff8a3d,roughness:0.5,metalness:0.0});
+
+  // Cell Wall (outer box w/ rounded-ish edges = sphere-squash look)
+  const wall   =new THREE.Mesh(new THREE.SphereGeometry(2.2,48,48), wallMat); wall.scale.set(1.25,1,0.9); wall.name="Cell Wall"; scene.add(wall);
+
+  // Membrane (inner sphere / shell)
+  const membrane=new THREE.Mesh(new THREE.SphereGeometry(2.0,64,64), membraneMat); membrane.scale.set(1.2,0.95,0.85); membrane.name="Plasma Membrane"; scene.add(membrane);
+
+  // Central Vacuole (big inner sphere)
+  const vacuole=new THREE.Mesh(new THREE.SphereGeometry(1.2,48,48), vacuoleMat); vacuole.position.set(-0.2,0.1,0.0); vacuole.name="Central Vacuole"; scene.add(vacuole);
+
+  // Nucleus
+  const nucleus=new THREE.Mesh(new THREE.SphereGeometry(0.55,48,48), nucleusMat); nucleus.position.set(0.8,0.2,0.1); nucleus.name="Nucleus"; scene.add(nucleus);
+
+  // Chloroplasts (green capsules)
+  const chloroGeom=new THREE.CapsuleGeometry(0.28,0.36,8,16);
+  const chloroplasts=[];
+  const chloroPositions=[[ -0.6,0.6, 0.2 ],[ -0.9,-0.3, 0.1 ],[ 0.1, -0.7,-0.3 ],[ 0.6, -0.2,-0.6 ],[ -0.3,0.1,0.9 ],[ 0.5,0.6,0.4 ]];
+  chloroPositions.forEach((p,i)=>{
+    const m=new THREE.Mesh(chloroGeom, chloroMat);
+    m.position.set(p[0],p[1],p[2]); m.rotation.set(Math.random(),Math.random(),Math.random());
+    m.name="Chloroplast"; scene.add(m); chloroplasts.push(m);
+  });
+
+  // Mitochondria (orange capsules)
+  const mitoGeom=new THREE.CapsuleGeometry(0.22,0.30,8,16);
+  const mitos=[];
+  const mitoPositions=[[ 0.9,-0.6,0.2 ],[ 0.2,0.9,-0.1 ],[ -0.8,0.1,-0.5 ],[ 0.7,0.1,0.7 ]];
+  mitoPositions.forEach(p=>{
+    const m=new THREE.Mesh(mitoGeom, mitoMat);
+    m.position.set(p[0],p[1],p[2]); m.rotation.set(Math.random(),Math.random(),Math.random());
+    m.name="Mitochondrion"; scene.add(m); mitos.push(m);
+  });
+
+  organelleMeshes=[membrane, vacuole, nucleus, ...chloroplasts, ...mitos, wall];
+
+  // Raycaster
+  raycaster=new THREE.Raycaster(); mouse=new THREE.Vector2();
+  canvas.addEventListener('pointerdown',onPick,false);
+
+  window.addEventListener('resize',onResize,false);
+  animate();
+}
+function onResize(){
+  const w=canvas.clientWidth, h=canvas.clientHeight;
+  camera.aspect=w/h; camera.updateProjectionMatrix(); renderer.setSize(w,h,false);
+}
+function onPick(event){
+  const rect=canvas.getBoundingClientRect();
+  mouse.x=((event.clientX-rect.left)/rect.width)*2-1;
+  mouse.y=-((event.clientY-rect.top)/rect.height)*2+1;
+  raycaster.setFromCamera(mouse,camera);
+  const hits=raycaster.intersectObjects(organelleMeshes,true);
+  if(hits.length>0){
+    const obj=hits[0].object;
+    showHover(`${obj.name}: ${organelleInfo(obj.name)}`);
+  }
+}
+function organelleInfo(name){
+  switch(name){
+    case "Cell Wall": return "Rigid cellulose wall: shape & protection.";
+    case "Plasma Membrane": return "Selective barrier: transport & signalling.";
+    case "Central Vacuole": return "Stores water/solutes; maintains turgor.";
+    case "Nucleus": return "DNA control center; transcription.";
+    case "Chloroplast": return "Photosynthesis: thylakoids & stroma.";
+    case "Mitochondrion": return "ATP powerhouse via respiration.";
+    default: return "Organelle";
+  }
+}
+function showHover(text){ const el=document.getElementById('hoverInfo'); el.textContent=text; el.style.background='linear-gradient(180deg,rgba(34,211,238,.25),rgba(34,211,238,.15))'; setTimeout(()=>{el.textContent="Tip: Click organelles for info"; el.style.background='';},2600); }
+function animate(){
+  requestAnimationFrame(animate);
+  if(autoRotate){ scene.rotation.y+=0.002; }
+  controls.update(); renderer.render(scene,camera);
+}
+init3D();
+
+// 3D controls
+document.getElementById('toggleRotate').addEventListener('click',()=>{
+  autoRotate=!autoRotate;
+  document.getElementById('toggleRotate').textContent = "Auto-rotate: " + (autoRotate ? "On" : "Off");
+});
+document.getElementById('resetCam').addEventListener('click',()=>{
+  scene.rotation.set(0,0,0);
+  camera.position.set(3.6,2.6,3.6);
+  controls.target.set(0,0,0); controls.update();
+});
+</script>
+</body>
+</html>
